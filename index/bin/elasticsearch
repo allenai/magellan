@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+
+import subprocess
+import argparse
+
+def start():
+    subprocess.check_call([
+            "docker", "run", "-d", "--rm", "--name", "magellan-es", "-p", "9200:9200",
+            "-p", "9300:9300", "-e", "discovery.type=single-node", "-e", "cluster.name=magellan",
+            "elasticsearch:7.6.1" ])
+
+def status():
+    subprocess.check_call([ "docker", "ps", "--filter", "name=magellan-es" ])
+
+def logs(follow:bool = False):
+    cmd = [ "docker", "logs", "magellan-es" ]
+    if follow:
+        cmd.append("-f")
+    subprocess.check_call(cmd)
+
+def stop():
+    subprocess.check_call([ "docker", "stop", "magellan-es" ])
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(prog="elasticsearch",
+        description="Utility script for starting and stopping a local ES cluster.")
+
+    cmds = parser.add_subparsers(dest="cmd")
+
+    start_parser = cmds.add_parser("start", description="Start a local cluster.")
+
+    status_parser = cmds.add_parser("status", description="Query the status of a local cluster.")
+
+    stop_parser = cmds.add_parser("stop", description="Stop a local cluster")
+
+    logs_parser = cmds.add_parser("logs", description="Access application logs")
+    logs_parser.add_argument("-f", "--follow", help="If specified, continuous stream logs to stdout.",
+            action="store_true")
+
+    args = parser.parse_args()
+
+    if args.cmd == "start":
+        start()
+        print("⚡️ cluster starting and will be available at http://localhost:9200 shortly")
+    elif args.cmd == "stop":
+        print("⚡️ cluster stopped")
+        stop()
+    elif args.cmd == "status":
+        status()
+    elif args.cmd == "logs":
+        logs(args.follow)
+
