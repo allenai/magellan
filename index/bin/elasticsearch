@@ -43,8 +43,8 @@ if __name__ == "__main__":
         start()
         print("⚡️ cluster starting and will be available at http://localhost:9200 shortly")
     elif args.cmd == "stop":
-        print("⚡️ cluster stopped")
         stop()
+        print("⚡️ cluster stopped")
     elif args.cmd == "status":
         status()
     elif args.cmd == "logs":
