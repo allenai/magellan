@@ -120,6 +120,10 @@
                         "analyzer": "case_insensitive_stemmed_tokens_no_stop"
                     }
                 }
+            },
+            "collection": {
+                "type": "text",
+                "analyzer": "case_insensitive_exact"
             }
         }
     }

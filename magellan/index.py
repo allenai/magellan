@@ -64,18 +64,27 @@ class Client(Elasticsearch):
         Bulk index papers at the specified path. Each paper should be stored in a single
         JSON file.
         """
+        logger = logging.getLogger(__name__)
         batch = []
         total = 0
-        for f in os.listdir(path):
-            _, ext = os.path.splitext(f)
-            if ext == ".json":
-                with open(os.path.join(path, f), "r") as fh:
-                    paper = json.load(fh)
-                    batch.append(paper)
-                    if len(batch) == batch_size:
-                        self.bulk_index_papers(batch)
-                        total += len(batch)
-                        batch = []
+        for (dirpath, dirs, files) in os.walk(path):
+            for f in files:
+                _, ext = os.path.splitext(f)
+                if ext == ".json":
+                    [ _, collection ] = os.path.split(dirpath)
+                    full_path = os.path.join(dirpath, f)
+                    logger.debug(f"loading {full_path}")
+                    with open(full_path, "r") as fh:
+                        paper = json.load(fh)
+                        # The data is separated into directories, each of which we call a
+                        # collection. We append that info to each paper so we can filter
+                        # by collection.
+                        paper["collection"] = collection
+                        batch.append(paper)
+                        if len(batch) == batch_size:
+                            self.bulk_index_papers(batch)
+                            total += len(batch)
+                            batch = []
         if len(batch) > 0:
             self.bulk_index_papers(batch)
             total += len(batch)
