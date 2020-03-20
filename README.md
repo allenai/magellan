@@ -42,7 +42,7 @@ You can stop the cluster via:
 
 Be aware that the local cluster's data is wiped everytime it restarts.
 
-## Setting up a new Cluster
+## Setting Up a New Cluster
 
 If you've just created a cluster, you'll want to start by creating the required search indices
 via the `init` command:
