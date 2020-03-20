@@ -10,12 +10,7 @@ import json
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)))
 
 from magellan import index, utils
-
-def print_error(err: index.Error) -> None:
-    """
-    Helper for printing errors encountered while performing operations against the index.
-    """
-    logger.error({ "message": str(err), **err.details })
+from elasticsearch.exceptions import ElasticsearchException
 
 if __name__ == "__main__":
     # Setup a logger that emits JSON
@@ -60,33 +55,44 @@ if __name__ == "__main__":
     # If the user specified a credentials file, attempt to load them. We load them from a
     # file so that they're not passed as command line arguments which get cached in a user's
     # shell history.
-    username = None
-    password = None
+    http_auth = None
     if args.creds is not None:
         with open(args.creds, "r") as fh:
             creds = json.load(fh)
-            username = creds["username"]
-            password = creds["password"]
+            http_auth = (creds["username"], creds["password"])
 
     # Every command uses a client for interacting with the cluster.
-    client = index.Client(args.host, args.port, secure=args.secure, username=username,
-            password=password)
+    client = index.Client(
+        [ args.host ],
+        http_auth=http_auth,
+        scheme="https" if args.secure else "http",
+        port=args.port
+    )
 
     if args.cmd == "init":
         try:
             client.create_indices()
-            logger.info("Cluster initialization complete")
-        except index.Error as err:
-            print_error(err)
+            logger.info("Cluster setup complete")
+        except ElasticsearchException as err:
+            logger.error(err)
     elif args.cmd == "load":
         try:
             total = client.bulk_index_papers_from_path(args.data)
-            logger.info(f"Loaded {total} papers")
-        except index.Error as err:
-            print_error(err)
+            logger.info(f"Loaded {total} total papers")
+        except ElasticsearchException as err:
+            logger.error(err)
     elif args.cmd == "search":
         try:
-            results = client.search(args.query, args.size)
+            results = client.search(
+                body={
+                    "query": {
+                        "query_string": {
+                            "query": args.query
+                        }
+                    }
+                },
+                size=args.size
+            )
             if not args.pretty:
                 print(json.dumps(results))
             else:
@@ -106,6 +112,7 @@ if __name__ == "__main__":
             print_error(err)
     elif args.cmd == "stats":
         try:
-            print(json.dumps(client.stats()))
-        except index.Error as err:
-            print_error(err)
+            stats = client.indices.stats()
+            print(json.dumps(stats))
+        except ElasticsearchException as err:
+            logger.error(err)
