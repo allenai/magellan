@@ -54,7 +54,7 @@ class Index:
             self.version,
             f"{self.name}.json"))
 
-# Static mapping of indicies. For now there's only one.
+# Static mapping of indices. For now there's only one.
 PAPER = Index("paper", "v1")
 
 @dataclass
