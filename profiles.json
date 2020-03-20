@@ -1,0 +1,12 @@
+{
+    "dev": {
+        "host": "",
+        "port": 443,
+        "secure": true
+    },
+    "local": {
+        "host": "localhost",
+        "port": 9200,
+        "secure": false
+    }
+}

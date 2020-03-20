@@ -31,6 +31,8 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--port", type=int, default=9200)
     parser.add_argument("-s", "--secure", action="store_true")
     parser.add_argument("-c", "--creds", type=str, default=None, help="Path to a credentials file")
+    parser.add_argument("--profile", type=str, default=None,
+        help="A connection profile to use. If specified --port, --host and --secure are ignored.")
 
     cmds = parser.add_subparsers(dest="cmd")
 
@@ -57,6 +59,21 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    if args.profile:
+        with open(os.path.join(os.path.dirname(__file__), os.pardir, "profiles.json")) as fh:
+            profiles = json.load(fh)
+            profile = profiles[args.profile]
+            if profile is None:
+                logger.error(f"Profile not found {args.profile}")
+                sys.exit(1)
+            host = profile["host"]
+            port = profile["port"]
+            secure = profile["secure"]
+    else:
+        host = args.host
+        port = args.port
+        secure = args.secure
+
     # If the user specified a credentials file, attempt to load them. We load them from a
     # file so that they're not passed as command line arguments which get cached in a user's
     # shell history.
@@ -68,10 +85,10 @@ if __name__ == "__main__":
 
     # Every command uses a client for interacting with the cluster.
     client = index.Client(
-        [ args.host ],
+        [ host ],
         http_auth=http_auth,
-        scheme="https" if args.secure else "http",
-        port=args.port
+        scheme="https" if secure else "http",
+        port=port
     )
 
     if args.cmd == "init":
