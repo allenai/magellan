@@ -1,5 +1,3 @@
 # Magellan
 
-A project that aims to make the COVID-19 dataset easily explorable via
-web APIs.
-
+A CLI for creating and querying an Elasticsearch cluster populated with the COVID-19 dataset.
