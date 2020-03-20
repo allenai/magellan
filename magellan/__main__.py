@@ -35,20 +35,25 @@ if __name__ == "__main__":
     cmds = parser.add_subparsers(dest="cmd")
 
     # The init command sets up the required indices on a cluster
-    init = cmds.add_parser("init")
+    init = cmds.add_parser("init", help="Initialize a new search index.")
 
     # The load command indexes data
-    load = cmds.add_parser("load")
+    load = cmds.add_parser("load", help="Load data into the search index.")
     load.add_argument("-d", "--data", type=str, help="Path to the directory containing data to load.")
 
     # The search command executes a query string query.
-    search = cmds.add_parser("search")
+    search = cmds.add_parser("search",
+        help="Execute a query string query against the search index. " +
+             "See: https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html")
     search.add_argument("query", type=str, help="A search query to execute")
     search.add_argument("-s", "--size", type=int, help="The maximum number of results to return.", default=10)
     search.add_argument("-p", "--pretty", help="Nicely format the output", action="store_true", default=False)
 
     # The stats command returns cluster wide statistics
-    stats = cmds.add_parser("stats")
+    stats = cmds.add_parser("stats", help="Returns cluster statistics as JSON.")
+
+    # Delete all cluster data
+    delete = cmds.add_parser("delete", help="Deletes all data from the search index.")
 
     args = parser.parse_args()
 
@@ -73,12 +78,14 @@ if __name__ == "__main__":
         try:
             client.create_indices()
             logger.info("Cluster setup complete")
+            sys.exit(0)
         except ElasticsearchException as err:
             logger.error(err)
     elif args.cmd == "load":
         try:
             total = client.bulk_index_papers_from_path(args.data)
             logger.info(f"Loaded {total} total papers")
+            sys.exit(0)
         except ElasticsearchException as err:
             logger.error(err)
     elif args.cmd == "search":
@@ -108,11 +115,23 @@ if __name__ == "__main__":
                     print(f"Abstract:")
                     abstract = [ a["text"] for a in source["abstract"] ]
                     print("\n".join(abstract))
-        except index.Error as err:
-            print_error(err)
+            sys.exit(0)
+        except ElasticsearchException as err:
+            logger.error(err)
     elif args.cmd == "stats":
         try:
             stats = client.indices.stats()
             print(json.dumps(stats))
+            sys.exit(0)
+        except ElasticsearchException as err:
+            logger.error(err)
+    elif args.cmd == "delete":
+        confirm = input("This will delete all data, are you sure [y|n]? ")
+        if confirm != "y":
+            logger.info("No action taken")
+            sys.exit(0)
+        try:
+            client.indices.delete(index=index.PAPER.fqn())
+            logger.info(f"Deleted {index.PAPER.fqn()}")
         except ElasticsearchException as err:
             logger.error(err)
