@@ -5,12 +5,15 @@ import sys
 import os
 import logging
 import json
+import time
+import math
 
 # This makes sure we can import from the top level magellan package.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir)))
 
 from magellan import index, utils
 from elasticsearch.exceptions import ElasticsearchException
+from datetime import timedelta
 
 if __name__ == "__main__":
     # Setup a logger that emits JSON
@@ -41,7 +44,10 @@ if __name__ == "__main__":
 
     # The load command indexes data
     load = cmds.add_parser("load", help="Load data into the search index.")
-    load.add_argument("-d", "--data", type=str, help="Path to the directory containing data to load.")
+    load.add_argument("data", type=str, help="Path to the directory containing data to load.")
+    load.add_argument("-b", "--batch-size", type=int,
+        default=100,
+        help="The size of each batch. Set this higher to make things faster, and lower if index requests are timing out.")
 
     # The search command executes a query string query.
     search = cmds.add_parser("search",
@@ -100,8 +106,14 @@ if __name__ == "__main__":
             logger.error(err)
     elif args.cmd == "load":
         try:
-            total = client.bulk_index_papers_from_path(args.data)
-            logger.info(f"Loaded {total} total papers")
+            now = time.perf_counter()
+            total = client.bulk_index_papers_from_path(args.data, batch_size=args.batch_size)
+            elapsed = time.perf_counter() - now
+            delta = timedelta(seconds=elapsed)
+            # TODO: Use a third party library for formatting this
+            mins = math.floor(delta.total_seconds() / 60)
+            seconds = delta.total_seconds() - mins * 60
+            logger.info(f"Loaded {total} total papers in {mins}m {round(seconds)}s")
             sys.exit(0)
         except ElasticsearchException as err:
             logger.error(err)

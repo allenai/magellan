@@ -1,6 +1,6 @@
 {
     "dev": {
-        "host": "",
+        "host": "search-magellan-dev-kzifgoqipub6ppqfw35kxnwvge.us-west-2.es.amazonaws.com",
         "port": 443,
         "secure": true
     },

@@ -57,9 +57,9 @@ class Client(Elasticsearch):
         # This ensures the body is terminated by a closing newline
         body.append("")
         logger.info(f"Bulk indexing {len(papers)} papers")
-        self.bulk(index=PAPER.fqn(), body=body)
+        self.bulk(index=PAPER.fqn(), body=body, timeout="60s", request_timeout=60)
 
-    def bulk_index_papers_from_path(self, path: str, batch_size: int = 1000) -> int:
+    def bulk_index_papers_from_path(self, path: str, batch_size: int) -> int:
         """
         Bulk index papers at the specified path. Each paper should be stored in a single
         JSON file.
