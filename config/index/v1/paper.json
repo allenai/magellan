@@ -1,0 +1,126 @@
+{
+    "settings": {
+        "analysis": {
+            "analyzer": {
+                "exact": {
+                    "tokenizer": "keyword"
+                },
+                "case_insensitive_exact": {
+                    "tokenizer": "keyword",
+                    "filter": [ "lowercase" ]
+                },
+                "case_insensitive_tokens": {
+                    "tokenizer": "standard",
+                    "filter": [ "lowercase" ]
+                },
+                "case_insensitive_tokens_no_stop": {
+                    "tokenizer": "standard",
+                    "type": "standard",
+                    "filter": [ "case_insensitive_stop", "lowercase" ]
+
+                },
+                "case_insensitive_stemmed_tokens_no_stop": {
+                    "tokenizer": "standard",
+                    "type": "standard",
+                    "filter": [ "case_insensitive_stop", "lowercase", "en_stem" ]
+                }
+            },
+            "filter": {
+                "case_insensitive_stop": {
+                    "type": "stop",
+                    "ignore_case": true
+                },
+                "en_stem": {
+                    "type": "stemmer",
+                    "name": "english"
+                }
+            }
+        }
+    },
+    "mappings": {
+        "dynamic": false,
+        "properties": {
+            "paper_id": {
+                "type": "keyword"
+            },
+            "metadata": {
+                "properties": {
+                    "title": {
+                        "type": "text",
+                        "analyzer": "case_insensitive_stemmed_tokens_no_stop",
+                        "fields": {
+                            "exact": {
+                                "type": "text",
+                                "analyzer": "case_insensitive_exact"
+                            }
+                        }
+                    },
+                    "authors": {
+                        "properties": {
+                            "first": {
+                                "type": "text",
+                                "analyzer": "case_insensitive_tokens",
+                                "fields": {
+                                    "exact": {
+                                        "type": "text",
+                                        "analyzer": "case_insensitive_exact"
+                                    }
+                                }
+                            },
+                            "middle": {
+                                "type": "text",
+                                "analyzer": "case_insensitive_tokens",
+                                "fields": {
+                                    "exact": {
+                                        "type": "text",
+                                        "analyzer": "case_insensitive_exact"
+                                    }
+                                }
+                            },
+                            "last": {
+                                "type": "text",
+                                "analyzer": "case_insensitive_tokens",
+                                "fields": {
+                                    "exact": {
+                                        "type": "text",
+                                        "analyzer": "case_insensitive_exact"
+                                    }
+                                }
+                            },
+                            "suffix": {
+                                "type": "text",
+                                "analyzer": "case_insensitive_tokens",
+                                "fields": {
+                                    "exact": {
+                                        "type": "text",
+                                        "analyzer": "case_insensitive_exact"
+                                    }
+                                }
+                            },
+                            "email": {
+                                "type": "text",
+                                "analyzer": "case_insensitive_exact"
+                            }
+                        }
+                    }
+                }
+            },
+            "abstract": {
+                "properties": {
+                    "text": {
+                        "type": "text",
+                        "analyzer": "case_insensitive_stemmed_tokens_no_stop"
+                    }
+                }
+            },
+            "body_text": {
+                "properties": {
+                    "text": {
+                        "type": "text",
+                        "analyzer": "case_insensitive_stemmed_tokens_no_stop"
+                    }
+                }
+            }
+        }
+    }
+}
