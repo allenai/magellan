@@ -134,7 +134,7 @@ if __name__ == "__main__":
     if args.cmd == "init":
         try:
             indices = [ idx for idx in index.ALL_INDICES if idx.name == args.only or args.only is None ]
-            client.create_indices()
+            client.create_indices(indices)
             logger.info("Cluster setup complete")
             sys.exit(0)
         except ElasticsearchException as err:
