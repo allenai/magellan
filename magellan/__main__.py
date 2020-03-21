@@ -42,8 +42,12 @@ if __name__ == "__main__":
 
     cmds = parser.add_subparsers(dest="cmd")
 
+    index_names = [ idx.name for idx in index.ALL_INDICES ]
+
     # The init command sets up the required indices on a cluster
     init = cmds.add_parser("init", help="Initialize a new search index.")
+    init.add_argument("-o", "--only", type=str, choices=index_names, default=None,
+        help="If specified, only the provided index is initialized.")
 
     # The load command indexes data
     load = cmds.add_parser("load", help="Load data into the search index.")
@@ -51,6 +55,7 @@ if __name__ == "__main__":
     load.add_argument("-b", "--batch-size", type=int,
         default=100,
         help="The size of each batch. Set this higher to make things faster, and lower if index requests are timing out.")
+    load.add_argument("-o", "--only", type=str, choices=index_names, default=None)
 
     # The search command executes a query string query.
     search = cmds.add_parser("search",
@@ -65,6 +70,7 @@ if __name__ == "__main__":
 
     # Delete all cluster data
     delete = cmds.add_parser("delete", help="Deletes all data from the search index.")
+    delete.add_argument("-o", "--only", type=str, choices=index_names, default=None)
 
     args = parser.parse_args()
 
@@ -77,10 +83,10 @@ if __name__ == "__main__":
             if profile is None:
                 logger.error(f"Profile not found {args.profile}")
                 sys.exit(1)
-            host = profile["host"]
-            port = profile["port"]
-            secure = profile["secure"]
-            auth_type = profile["auth_type"]
+            host = profile.get("host")
+            port = profile.get("port")
+            secure = profile.get("secure")
+            auth_type = profile.get("auth_type")
     else:
         host = args.host
         port = args.port
@@ -127,6 +133,7 @@ if __name__ == "__main__":
 
     if args.cmd == "init":
         try:
+            indices = [ idx for idx in index.ALL_INDICES if idx.name == args.only or args.only is None ]
             client.create_indices()
             logger.info("Cluster setup complete")
             sys.exit(0)
@@ -135,16 +142,26 @@ if __name__ == "__main__":
     elif args.cmd == "load":
         try:
             now = time.perf_counter()
-            total_papers = 0
-            total_papers = client.bulk_index_papers_from_path(args.data, batch_size=args.batch_size)
-            total_metadata_entries = client.bulk_index_metadata_from_file(
-                os.path.join(args.data, "metadata.csv"), batch_size=args.batch_size)
+            types_to_load = set([ args.only or idx.name for idx in index.ALL_INDICES ])
+            if index.PAPER.name in types_to_load:
+                total_papers = client.bulk_index_papers_from_path(args.data, batch_size=args.batch_size)
+            else:
+                total_papers = 0
+            if index.METADATA.name in types_to_load:
+                metadata_file_path = os.path.join(args.data, "metadata.csv")
+                total_metadata_entries = client.bulk_index_metadata_from_file(metadata_file_path,
+                    batch_size=args.batch_size)
+            else:
+                total_metadata_entries = 0
+            # TODO: Find a third party library for formatting durations.
             elapsed = time.perf_counter() - now
             delta = timedelta(seconds=elapsed)
-            # TODO: Use a third party library for formatting this
             mins = math.floor(delta.total_seconds() / 60)
             seconds = delta.total_seconds() - mins * 60
-            logger.info(f"Loaded {total_papers} papers and {total_metadata_entries} metadata entries in {mins}m {round(seconds)}s")
+            logger.info(
+                f"Loaded {total_papers} papers and {total_metadata_entries} metadata entries in " +
+                f"{mins}m{round(seconds)}s"
+            )
             sys.exit(0)
         except ElasticsearchException as err:
             logger.error(err)
@@ -186,11 +203,13 @@ if __name__ == "__main__":
         except ElasticsearchException as err:
             logger.error(err)
     elif args.cmd == "delete":
-        confirm = input("This will delete all data, are you sure [y|n]? ")
+        indices = [ idx for idx in index.ALL_INDICES if idx.name == args.only or args.only is None ]
+        to_delete = ", ".join([ idx.name for idx in indices ])
+        confirm = input(f"This will delete all data in indices: {to_delete}, are you sure [y|n]? ")
         if confirm != "y":
             logger.info("No action taken")
             sys.exit(0)
         try:
-            client.delete_all_indices()
+            client.delete_indices(indices)
         except ElasticsearchException as err:
             logger.error(err)

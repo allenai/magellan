@@ -3,7 +3,7 @@ import logging
 import json
 import csv
 
-from typing import List
+from typing import List, Optional
 from dataclasses import dataclass
 from elasticsearch import Elasticsearch
 
@@ -27,7 +27,8 @@ class Index:
             "config",
             "index",
             self.version,
-            f"{self.name}.json"))
+            f"{self.name}.json"
+        ))
 
 # Static mapping of indices. For now there's only one.
 PAPER = Index("paper", "v1")
@@ -35,11 +36,11 @@ METADATA = Index("metadata", "v1")
 ALL_INDICES = [ PAPER, METADATA ]
 
 class Client(Elasticsearch):
-    def create_indices(self) -> None:
+    def create_indices(self, indices: List[Index] = ALL_INDICES) -> None:
         """
-        Initialize the search index by creating the required search indices.
+        Initializes the provided list of indices.
         """
-        for idx in ALL_INDICES:
+        for idx in indices:
             config_path = idx.config_path()
             with open(config_path, "r") as fh:
                 config = json.load(fh)
@@ -63,7 +64,7 @@ class Client(Elasticsearch):
 
     def bulk_index_metadata(self, metadata: List[dict]) -> None:
         """
-        Bulk indexes a list of metadata.
+        Bulk indexes a list of metadata entries.
         """
         logger = logging.getLogger(__name__)
         body = []
@@ -109,12 +110,15 @@ class Client(Elasticsearch):
         return total
 
     def bulk_index_metadata_from_file(self, file_path: str, batch_size: int) -> int:
+        """
+        Bulk index metadata entries from the provided csv file.
+        """
         batch = []
         total = 0
         with open(file_path, "r") as fh:
             for row in csv.reader(fh):
                 entry = {
-                    "sha": row[0],
+                    "paper_ids": [ pid.strip() for pid in row[0].split(";") ],
                     "source": row[1],
                     "title": row[2],
                     "doi": row[3],
@@ -140,7 +144,11 @@ class Client(Elasticsearch):
             total += len(batch)
         return total
 
-    def delete_all_indices(self):
-        for idx in ALL_INDICES:
+    def delete_indices(self, indices: List[Index] = ALL_INDICES) -> None:
+        """
+        Deletes the provided indices. Defaults to deleting all indices. Be careful, as this
+        cannot be reversed.
+        """
+        for idx in indices:
             self.indices.delete(index=idx.fqn())
-        logger.info(f"Deleted {idx.fqn()}")
+        logger.getLogger(__name__).info(f"Deleted {idx.fqn()}")

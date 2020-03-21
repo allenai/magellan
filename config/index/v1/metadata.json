@@ -40,7 +40,7 @@
     "mappings": {
         "dynamic": false,
         "properties": {
-            "sha": {
+            "paper_ids": {
                 "type": "keyword"
             },
             "source": {
