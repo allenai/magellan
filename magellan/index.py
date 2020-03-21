@@ -151,4 +151,4 @@ class Client(Elasticsearch):
         """
         for idx in indices:
             self.indices.delete(index=idx.fqn())
-        logger.getLogger(__name__).info(f"Deleted {idx.fqn()}")
+        logging.getLogger(__name__).info(f"Deleted {idx.fqn()}")
