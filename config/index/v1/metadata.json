@@ -1,0 +1,108 @@
+{
+    "settings": {
+        "analysis": {
+            "analyzer": {
+                "exact": {
+                    "tokenizer": "keyword"
+                },
+                "case_insensitive_exact": {
+                    "tokenizer": "keyword",
+                    "filter": [ "lowercase" ]
+                },
+                "case_insensitive_tokens": {
+                    "tokenizer": "standard",
+                    "filter": [ "lowercase" ]
+                },
+                "case_insensitive_tokens_no_stop": {
+                    "tokenizer": "standard",
+                    "type": "standard",
+                    "filter": [ "case_insensitive_stop", "lowercase" ]
+
+                },
+                "case_insensitive_stemmed_tokens_no_stop": {
+                    "tokenizer": "standard",
+                    "type": "standard",
+                    "filter": [ "case_insensitive_stop", "lowercase", "en_stem" ]
+                }
+            },
+            "filter": {
+                "case_insensitive_stop": {
+                    "type": "stop",
+                    "ignore_case": true
+                },
+                "en_stem": {
+                    "type": "stemmer",
+                    "name": "english"
+                }
+            }
+        }
+    },
+    "mappings": {
+        "dynamic": false,
+        "properties": {
+            "sha": {
+                "type": "keyword"
+            },
+            "source": {
+                "type": "text",
+                "analyzer": "case_insensitive_exact"
+            },
+            "title": {
+                "type": "text",
+                "analyzer": "case_insensitive_stemmed_tokens_no_stop",
+                "fields": {
+                    "exact": {
+                        "type": "text",
+                        "analyzer": "case_insensitive_exact"
+                    }
+                }
+            },
+            "doi": {
+                "type": "keyword"
+            },
+            "pmcid": {
+                "type": "keyword"
+            },
+            "pubmed_id": {
+                "type": "keyword"
+            },
+            "license": {
+                "type": "text",
+                "analyzer": "case_insensitive_exact"
+            },
+            "abstract": {
+                "type": "text",
+                "analyzer": "case_insensitive_stemmed_tokens_no_stop"
+            },
+            "publish_time": {
+                "type": "date"
+            },
+            "authors": {
+                "type": "text",
+                "analyzer": "case_insensitive_tokens",
+                "fields": {
+                    "exact": {
+                        "type": "text",
+                        "analyzer": "case_insensitive_exact"
+                    }
+                }
+            },
+            "journal": {
+                "type": "text",
+                "analyzer": "case_insensitive_exact"
+            },
+            "msft_academic_paper_id": {
+                "type": "keyword"
+            },
+            "who_covidence_number": {
+                "type": "keyword"
+            },
+            "has_full_text": {
+                "type": "boolean"
+            },
+            "collection": {
+                "type": "keyword"
+            }
+        }
+    }
+}
