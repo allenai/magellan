@@ -1,4 +1,3 @@
 data/
 **/*.pyc
-creds.json
-aws_creds.json
+secrets/
