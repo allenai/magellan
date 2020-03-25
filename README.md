@@ -1,6 +1,6 @@
 # Magellan
 
-A CLI for loading the [CORD-19](https://pages.semanticscholar.org/coronavirus-research) dataset into an 
+A CLI for loading the [CORD-19](https://pages.semanticscholar.org/coronavirus-research) dataset into an
 Elasticsearch cluster.
 
 ## Prerequisites
@@ -23,56 +23,51 @@ Elasticsearch cluster.
     python -m pip install -r requirements.txt
     ```
 
-## Usage
+## Getting Started
 
-First download the [CORD-19 dataset](https://pages.semanticscholar.org/coronavirus-research) to
-your local machine.
+1. First download the [CORD-19 dataset](https://pages.semanticscholar.org/coronavirus-research) to
+   your local machine.
 
-If you'd like to use a local cluster, you can start one like so:
+2. Then start a local Elasticsearch instance like so:
 
-```
-./bin/elasticsearch start
-```
+    ```
+    ./bin/elasticsearch start
+    ```
 
-The cluster will run in the background on your local machine, listening on ports `9200` and `9300`.
-You can stop the cluster via:
+    The cluster will run in the background on your local machine, listening on ports `9200` and `9300`.
 
-```
-./bin/elasticsearch stop
-```
+    You can stop the cluster at any time by running:
 
-Be aware that the local cluster's data is wiped everytime it restarts.
+    ```
+    ./bin/elasticsearch stop
+    ```
 
-## Setting Up a New Cluster
+3. Next, initialize the index:
 
-If you've just created a cluster, you'll want to start by creating the required search indices
-via the `init` command:
+    ```
+    python -m magellan init
+    ```
 
-```
-python -m magellan --profile local init
-```
+4. Finally, load the data into the idnex:
 
-Next, you can populate it with data by running. Replace `data/` with the path to your local version
-of the CORD-19 dataset.
+    ```
+    python magellan load
+    ```
 
-```
-python -m magellan --profile local load data/
-```
+Your local elasticsearch cluster's data is wiped everytime it's restarted, so you'll need to
+reexecute the steps above to repopulate the index after doing so.
 
-Once that's complete, you can execute simple queries like so:
+## Explore the Data
 
-```
-python -m magellan --profile local search COVID --pretty
-```
+You can use [Santiago](https://github.com/allenai/santiago) to run a local UI for issuing full-text
+queries against the cluster.
 
-If you omit the `--pretty` option raw JSON will be emitted, you can use [`jq`](https://stedolan.github.io/jq/) to process the
-data:
+## Contributions
 
-```
-python -m magellan --profile local search "COVID transmission rates" | \
-    jq '.hits.hits[]._source | { title: .metadata.title, id: .paper_id, abstract: .abstract[].text }'
-```
+We welcome and encourage contributions. Please don't hesitate to submit a pull request.
 
 ## Getting Help
 
-Send a note to [sams@allenai.org](mailto:sams@allenai.org) if you'd like help using this tool.
+Don't hesitate to ask questions or propose ideas in the [CORD-19 Discourse](https://discourse.cord-19.semanticscholar.org/).
+
+You can also submit bugs or feature proposals [here](https://github.com/allenai/magellan/issues).
