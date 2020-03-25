@@ -48,11 +48,15 @@ Elasticsearch cluster.
     python -m magellan init
     ```
 
-4. Finally, load the data into the idnex:
+4. Finally, load the data into the index:
 
     ```
     python magellan load
     ```
+
+  It takes about 5 minutes to load the the data into a local index. It takes
+  about an hour to populate a remote one. We'll make that faster in the near
+  term.
 
 Your local elasticsearch cluster's data is wiped everytime it's restarted, so you'll need to
 reexecute the steps above to repopulate the index after doing so.
