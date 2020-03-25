@@ -131,7 +131,7 @@ class Client(Elasticsearch):
                     "journal": row[10],
                     "msft_academic_id": row[11],
                     "who_covidence_number": row[12],
-                    "has_full_text": [ True if row[13] == "True" else False ],
+                    "has_full_text": True if row[13] == "True" else False,
                     "collection": row[14]
                 }
                 batch.append(entry)
