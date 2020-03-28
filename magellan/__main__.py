@@ -49,6 +49,10 @@ if __name__ == "__main__":
     init.add_argument("-o", "--only", type=str, choices=index_names, default=None,
         help="If specified, only the provided index is initialized.")
 
+    update_mappings = cmds.add_parser("update-mappings", help="Update search index mappings.")
+    update_mappings.add_argument("-o", "--only", type=str, choices=index_names,
+        default=None, help="If specified, only the provided index's mappings are updated.")
+
     # The load command indexes data
     load = cmds.add_parser("load", help="Load data into the search index.")
     load.add_argument("data", type=str, help="Path to the directory containing data to load.")
@@ -162,6 +166,14 @@ if __name__ == "__main__":
                 f"Loaded {total_papers} papers and {total_metadata_entries} metadata entries in " +
                 f"{mins}m{round(seconds)}s"
             )
+            sys.exit(0)
+        except ElasticsearchException as err:
+            logger.error(err)
+    elif args.cmd == "update-mappings":
+        try:
+            indices = [ idx for idx in index.ALL_INDICES if idx.name == args.only or args.only is None ]
+            client.update_mappings(indices)
+            logger.info("Mappings updated")
             sys.exit(0)
         except ElasticsearchException as err:
             logger.error(err)

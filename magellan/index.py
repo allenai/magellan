@@ -46,6 +46,13 @@ class Client(Elasticsearch):
                 config = json.load(fh)
                 self.indices.create(index=idx.fqn(), body=config)
 
+    def update_mappings(self, indices: List[Index] = ALL_INDICES) -> None:
+        for idx in indices:
+            config_path = idx.config_path()
+            with open(config_path, "r") as fh:
+                config = json.load(fh)
+                self.indices.put_mapping(index=idx.fqn(), body=config["mappings"])
+
     def bulk_index_papers(self, papers: List[dict]) -> None:
         """
         Bulk indexes a list of papers.
@@ -118,21 +125,23 @@ class Client(Elasticsearch):
         with open(file_path, "r") as fh:
             for row in csv.reader(fh):
                 entry = {
-                    "paper_ids": [ pid.strip() for pid in row[0].split(";") ],
-                    "source": row[1],
-                    "title": row[2],
-                    "doi": row[3],
-                    "pmcid": row[4],
-                    "pubmed_id": row[5],
-                    "license": row[6],
-                    "abstract": row[7],
-                    "publish_time": row[8],
-                    "authors": [ a.strip() for a in row[9].split(";") ],
-                    "journal": row[10],
-                    "msft_academic_id": row[11],
-                    "who_covidence_number": row[12],
-                    "has_full_text": True if row[13] == "True" else False,
-                    "collection": row[14]
+                    "cord_uid": row[0],
+                    "paper_ids": [ pid.strip() for pid in row[1].split(";") ],
+                    "source": row[2],
+                    "title": row[3],
+                    "doi": row[4],
+                    "pmcid": row[5],
+                    "pubmed_id": row[6],
+                    "license": row[7],
+                    "abstract": row[8],
+                    "publish_time": row[9],
+                    "authors": [ a.strip() for a in row[10].split(";") ],
+                    "journal": row[11],
+                    "msft_academic_id": row[12],
+                    "who_covidence_number": row[13],
+                    "has_full_text": True if row[14] == "True" else False,
+                    "collection": row[15],
+                    "url": row[16]
                 }
                 batch.append(entry)
                 if len(batch) == batch_size:
