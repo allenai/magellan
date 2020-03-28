@@ -40,6 +40,12 @@
     "mappings": {
         "dynamic": false,
         "properties": {
+            "cord_uid": {
+                "type": "keyword"
+            },
+            "url": {
+                "type": "keyword"
+            },
             "paper_ids": {
                 "type": "keyword"
             },
