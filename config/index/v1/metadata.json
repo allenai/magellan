@@ -43,9 +43,6 @@
             "cord_uid": {
                 "type": "keyword"
             },
-            "url": {
-                "type": "keyword"
-            },
             "paper_ids": {
                 "type": "keyword"
             },
@@ -103,10 +100,16 @@
             "who_covidence_number": {
                 "type": "keyword"
             },
-            "has_full_text": {
+            "has_pdf_parse": {
                 "type": "boolean"
             },
-            "collection": {
+            "has_pmc_xml_parse": {
+                "type": "boolean"
+            },
+            "full_text_file": {
+                "type": "keyword"
+            },
+            "url": {
                 "type": "keyword"
             }
         }

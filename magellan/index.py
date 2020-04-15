@@ -139,9 +139,10 @@ class Client(Elasticsearch):
                     "journal": row[11],
                     "msft_academic_id": row[12],
                     "who_covidence_number": row[13],
-                    "has_full_text": True if row[14] == "True" else False,
-                    "collection": row[15],
-                    "url": row[16]
+                    "has_pdf_parse": True if row[14] == "True" else False,
+                    "has_pmc_xml_parse": True if row[15] == "True" else False,
+                    "full_text_file": row[16],
+                    "url": row[17]
                 }
                 batch.append(entry)
                 if len(batch) == batch_size:
