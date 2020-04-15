@@ -49,7 +49,7 @@
             "paper_ids": {
                 "type": "keyword"
             },
-            "source": {
+            "source_x": {
                 "type": "text",
                 "analyzer": "case_insensitive_exact"
             },

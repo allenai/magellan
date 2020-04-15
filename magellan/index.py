@@ -127,7 +127,7 @@ class Client(Elasticsearch):
                 entry = {
                     "cord_uid": row[0],
                     "paper_ids": [ pid.strip() for pid in row[1].split(";") ],
-                    "source": row[2],
+                    "source_x": row[2],
                     "title": row[3],
                     "doi": row[4],
                     "pmcid": row[5],
