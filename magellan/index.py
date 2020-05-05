@@ -97,7 +97,11 @@ class Client(Elasticsearch):
             for f in files:
                 _, ext = os.path.splitext(f)
                 if ext == ".json":
-                    [ _, collection ] = os.path.split(dirpath)
+                    # The json files are partitioned into directories by type within each source.
+                    # We therefore find the collection / source by taking the parent of the current
+                    # directory.
+                    _, collection = os.path.split(os.path.abspath(os.path.join(dirpath,
+                                                                               os.pardir)))
                     full_path = os.path.join(dirpath, f)
                     logger.debug(f"loading {full_path}")
                     with open(full_path, "r") as fh:
@@ -139,10 +143,11 @@ class Client(Elasticsearch):
                     "journal": row[11],
                     "msft_academic_id": row[12],
                     "who_covidence_number": row[13],
-                    "has_pdf_parse": True if row[14] == "True" else False,
-                    "has_pmc_xml_parse": True if row[15] == "True" else False,
-                    "full_text_file": row[16],
-                    "url": row[17]
+                    "arxiv_id": row[14],
+                    "has_pdf_parse": True if row[15] == "True" else False,
+                    "has_pmc_xml_parse": True if row[16] == "True" else False,
+                    "full_text_file": row[17],
+                    "url": row[18]
                 }
                 batch.append(entry)
                 if len(batch) == batch_size:

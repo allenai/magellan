@@ -111,6 +111,9 @@
             },
             "url": {
                 "type": "keyword"
+            },
+            "arxiv_id": {
+                "type": "keyword"
             }
         }
     }
