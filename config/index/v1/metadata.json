@@ -94,19 +94,16 @@
                 "type": "text",
                 "analyzer": "case_insensitive_exact"
             },
-            "msft_academic_paper_id": {
+            "mag_id": {
                 "type": "keyword"
             },
-            "who_covidence_number": {
+            "who_covidence_id": {
                 "type": "keyword"
             },
-            "has_pdf_parse": {
-                "type": "boolean"
+            "pdf_json_files": {
+                "type": "keyword"
             },
-            "has_pmc_xml_parse": {
-                "type": "boolean"
-            },
-            "full_text_file": {
+            "pmc_json_files": {
                 "type": "keyword"
             },
             "url": {

@@ -130,7 +130,7 @@ class Client(Elasticsearch):
             for row in csv.reader(fh):
                 entry = {
                     "cord_uid": row[0],
-                    "paper_ids": [ pid.strip() for pid in row[1].split(";") ],
+                    "paper_ids": [ pid.strip() for pid in row[1].split(";") if pid.strip() != "" ],
                     "source_x": row[2],
                     "title": row[3],
                     "doi": row[4],
@@ -139,15 +139,14 @@ class Client(Elasticsearch):
                     "license": row[7],
                     "abstract": row[8],
                     "publish_time": row[9],
-                    "authors": [ a.strip() for a in row[10].split(";") ],
+                    "authors": [ a.strip() for a in row[10].split(";") if a.strip() != "" ],
                     "journal": row[11],
-                    "msft_academic_id": row[12],
-                    "who_covidence_number": row[13],
+                    "mag_id": row[12],
+                    "who_covidence_id": row[13],
                     "arxiv_id": row[14],
-                    "has_pdf_parse": True if row[15] == "True" else False,
-                    "has_pmc_xml_parse": True if row[16] == "True" else False,
-                    "full_text_file": row[17],
-                    "url": row[18]
+                    "pdf_json_files": [ file.strip() for file in row[15].split(";") if file.strip() != "" ],
+                    "pmc_json_files": [ file.strip() for file in row[16].split(";") if file.strip() != "" ],
+                    "url": row[17]
                 }
                 batch.append(entry)
                 if len(batch) == batch_size:
